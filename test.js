@@ -1,11 +1,12 @@
-let { ContractWrappers, ERC20TokenContract, OrderStatus } = require('@0x/contract-wrappers');
+let { ContractWrappers, ERC20TokenContract, ERC721TokenContract, OrderStatus } = require('@0x/contract-wrappers');
 let { providerEngine } = require('./provider_engine');
-let { generatePseudoRandomSalt, signatureUtils } = require('@0x/order-utils');
+let { assetDataUtils, generatePseudoRandomSalt, signatureUtils } = require('@0x/order-utils');
 let { BigNumber } = require('@0x/utils');
-let { NETWORK_CONFIGS, TX_DEFAULTS } = require('./configs');
+let { NETWORK_CONFIGS } = require('./configs');
 let { DECIMALS, UNLIMITED_ALLOWANCE_IN_BASE_UNITS, NULL_ADDRESS, NULL_BYTES, ZERO } = require('./constants');
 let { Web3Wrapper } = require('@0x/web3-wrapper');
 let utils = require('./utils');
+let dummyERC721TokenContracts = require('./contracts');
 
 //TESTB 0xAAeFF7414dD979d4338799113Ca515cC5af76185
 //TESTC 0xbA3808635a43D36153D6E4739e9901B130E83bD5
@@ -14,38 +15,34 @@ let utils = require('./utils');
     const web3Wrapper = new Web3Wrapper(providerEngine());
     const [maker, taker] = await web3Wrapper.getAvailableAddressesAsync();
 
-    const TestBTokenAddress = "0x479868D862A3d24E546112dD59e3540d95A72B47".toLowerCase()
-    const TestCTokenAddress = "0x3ebB167e97Ca0fa662d107ecB5BeF9A055104ee5".toLowerCase();
-    const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(10), DECIMALS);
+    console.log(maker)
+    console.log(taker)
+    const TestBTokenAddress = "0x7947E71Ddbd927EF2e37aED94Fd83697775c5b29".toLowerCase()
+    const dummyERC721TokenContract = dummyERC721TokenContracts[0];
+    const makerAssetAmount = new BigNumber(1);
+    const tokenId = generatePseudoRandomSalt();
     const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(new BigNumber(10), DECIMALS);
-    const makerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(TestBTokenAddress).callAsync();
-    const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(TestCTokenAddress).callAsync();
+    const makerAssetData = assetDataUtils.encodeERC721AssetData(dummyERC721TokenContract.address, tokenId);
+    const takerAssetData = await contractWrappers.devUtils.encodeERC20AssetData(TestBTokenAddress).callAsync();
     let txHash;
 
-    const erc20Token = new ERC20TokenContract(TestBTokenAddress, providerEngine());
-    const makerTestBApprovalTxHash = await erc20Token
-        .approve(contractWrappers.contractAddresses.erc20Proxy, UNLIMITED_ALLOWANCE_IN_BASE_UNITS)
-        .sendTransactionAsync({ from: maker, gasPrice: 0 });
-    console.log(makerTestBApprovalTxHash)
+    // Mint a new ERC721 token for the maker
+    const mintTxHash = await dummyERC721TokenContract.mint(maker, tokenId).sendTransactionAsync({ from: maker });
+    console.log(mintTxHash);
 
-    const etherToken = new ERC20TokenContract(TestCTokenAddress, providerEngine());
-    const takerTestCApprovalTxHash = await etherToken
+    // Allow the 0x ERC721 Proxy to move ERC721 tokens on behalf of maker
+    const erc721Token = new ERC721TokenContract(dummyERC721TokenContract.address, providerEngine());
+    const makerERC721ApprovalTxHash = await erc721Token
+        .setApprovalForAll(contractWrappers.contractAddresses.erc721Proxy, true)
+        .sendTransactionAsync({ from: maker });
+    console.log(makerERC721ApprovalTxHash);
+
+
+    const erc20Token = new ERC20TokenContract(TestBTokenAddress, providerEngine());
+    const takerTestBApprovalTxHash = await erc20Token
         .approve(contractWrappers.contractAddresses.erc20Proxy, UNLIMITED_ALLOWANCE_IN_BASE_UNITS)
         .sendTransactionAsync({ from: taker, gasPrice: 0 });
-    console.log(takerTestCApprovalTxHash)
-
-    // const wethToken = new ERC20TokenContract("0x99c2f0c10a64fdbf466a5f4f24794f7c112c23a4".toLowerCase(), providerEngine());
-    // const takerWETHApprovalTxHash = await wethToken
-    //     .approve(contractWrappers.contractAddresses.staking, UNLIMITED_ALLOWANCE_IN_BASE_UNITS)
-    //     .sendTransactionAsync({ from: taker, gasPrice: 0 });
-    // console.log(takerWETHApprovalTxHash);
-
-    // Convert ETH into WETH for taker by depositing ETH into the WETH contract
-    // const takerWETHDepositTxHash = await contractWrappers.weth9.deposit().sendTransactionAsync({
-    //     value: takerAssetAmount,
-    //     from: taker,
-    // });
-    // console.log(takerWETHDepositTxHash)
+    console.log(takerTestBApprovalTxHash)
 
     // Set up the Order and fill it
     const randomExpiration = utils.getRandomFutureDateInSeconds();
@@ -70,6 +67,8 @@ let utils = require('./utils');
         makerFee: ZERO,
         takerFee: ZERO,
     };
+
+    console.log(order)
 
 
     const signedOrder = await signatureUtils.ecSignOrderAsync(providerEngine(), order, maker);
@@ -103,8 +102,92 @@ let utils = require('./utils');
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // const stakingContract = contractWrappers.staking;
+    // let res = await stakingContract.addExchangeAddress(contractWrappers.contractAddresses.exchange).awaitTransactionSuccessAsync({
+    //     from: maker,
+    // });
+    // console.log(res)
+    // const tx = await stakingContract.removeExchangeAddress(contractWrappers.contractAddresses.exchange).awaitTransactionSuccessAsync({
+    //     from: maker,
+    // })
+    // console.log(tx)
+
+    // const receipt = await stakingContract
+    //     .payProtocolFee(maker, taker, new BigNumber(1))
+    //     .awaitTransactionSuccessAsync({ from: maker, value: 0 });
+    // console.log(receipt)
+
+
+
 /**
- * V3
  * // "15001": {
 //     "erc20Proxy": "0xed13914560569d8f902fe1eaa945578a738f7a63",
 //     "erc721Proxy": "0xdff51569f6dd4cb74054cd8e14c3aeca06734f47",
