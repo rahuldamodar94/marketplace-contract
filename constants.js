@@ -10,6 +10,6 @@ module.exports = {
     NULL_BYTES: '0x',
     ZERO: new BigNumber(0),
     ROPSTEN_NETWORK_ID: 3,
-    MATIC_NETWORK_ID: 15001
+    MATIC_NETWORK_ID: 80001
 }
 
