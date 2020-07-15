@@ -29,9 +29,9 @@ let utils = require("./utils");
   });
   const web3Wrapper = new Web3Wrapper(providerEngine());
   const [maker, taker] = await web3Wrapper.getAvailableAddressesAsync();
-
-  const TestBTokenAddress = "0x83d3E487Fe04F9c407C407Dddd15665373f48B0f".toLowerCase();
-  const TestCTokenAddress = "0x4dEcB06A6f31d71Ac14fa9d77CdE23800619fE24".toLowerCase();
+  console.log(maker, taker);
+  const TestBTokenAddress = "0x872232303f6E708c148f1f8BD57f60E1cC84C450".toLowerCase();
+  const TestCTokenAddress = "0x3fb94fEa7D6e0b94f0342027922CEf42C64bF55D".toLowerCase();
   const makerAssetAmount = new BigNumber(1);
   const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
     new BigNumber(10),
@@ -116,8 +116,6 @@ let utils = require("./utils");
     order,
     maker
   );
-
-  console.log(signedOrder);
 
   // cancel order
   // const txHashCancel = await contractWrappers.exchange
