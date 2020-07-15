@@ -117,9 +117,13 @@ let utils = require("./utils");
     maker
   );
 
+  console.log(signedOrder);
+
   // cancel order
-  // const txHashCancel = await contractWrappers.exchange.cancelOrder(order).awaitTransactionSuccessAsync({ from: maker, gasPrice: 0, gas: 8000000 });
-  // console.log(txHashCancel)
+  // const txHashCancel = await contractWrappers.exchange
+  //   .cancelOrder(order)
+  //   .awaitTransactionSuccessAsync({ from: maker, gasPrice: 0, gas: 8000000 });
+  // console.log(txHashCancel);
 
   const [
     { orderStatus, orderHash },

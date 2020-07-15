@@ -42,29 +42,29 @@ let utils = require("./utils");
     .callAsync();
   let txHash;
 
-  // const erc20Token = new ERC20TokenContract(
-  //   TestBTokenAddress,
-  //   providerEngine()
-  // );
-  // const makerTestBApprovalTxHash = await erc20Token
-  //   .approve(
-  //     contractWrappers.contractAddresses.erc20Proxy,
-  //     UNLIMITED_ALLOWANCE_IN_BASE_UNITS
-  //   )
-  //   .sendTransactionAsync({ from: maker });
-  // console.log(makerTestBApprovalTxHash);
+  const erc20Token = new ERC20TokenContract(
+    TestBTokenAddress,
+    providerEngine()
+  );
+  const makerTestBApprovalTxHash = await erc20Token
+    .approve(
+      contractWrappers.contractAddresses.erc20Proxy,
+      UNLIMITED_ALLOWANCE_IN_BASE_UNITS
+    )
+    .sendTransactionAsync({ from: maker });
+  console.log(makerTestBApprovalTxHash);
 
-  // const etherToken = new ERC20TokenContract(
-  //   TestCTokenAddress,
-  //   providerEngine()
-  // );
-  // const takerTestCApprovalTxHash = await etherToken
-  //   .approve(
-  //     contractWrappers.contractAddresses.erc20Proxy,
-  //     UNLIMITED_ALLOWANCE_IN_BASE_UNITS
-  //   )
-  //   .sendTransactionAsync({ from: taker });
-  // console.log(takerTestCApprovalTxHash);
+  const etherToken = new ERC20TokenContract(
+    TestCTokenAddress,
+    providerEngine()
+  );
+  const takerTestCApprovalTxHash = await etherToken
+    .approve(
+      contractWrappers.contractAddresses.erc20Proxy,
+      UNLIMITED_ALLOWANCE_IN_BASE_UNITS
+    )
+    .sendTransactionAsync({ from: taker });
+  console.log(takerTestCApprovalTxHash);
 
   // Set up the Order and fill it
   const randomExpiration = utils.getRandomFutureDateInSeconds();
