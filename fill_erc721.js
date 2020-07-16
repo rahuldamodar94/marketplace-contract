@@ -28,10 +28,10 @@ let utils = require("./utils");
     chainId: NETWORK_CONFIGS.chainId,
   });
   const web3Wrapper = new Web3Wrapper(providerEngine());
-  const [maker, taker] = await web3Wrapper.getAvailableAddressesAsync();
+  const [maker, taker2, taker] = await web3Wrapper.getAvailableAddressesAsync();
   console.log(maker, taker);
-  const TestBTokenAddress = "0x872232303f6E708c148f1f8BD57f60E1cC84C450".toLowerCase();
-  const TestCTokenAddress = "0x3fb94fEa7D6e0b94f0342027922CEf42C64bF55D".toLowerCase();
+  const TestBTokenAddress = "0x6F5b486C2d714c11C66b0a7C794316279B3D41e9".toLowerCase();
+  const TestCTokenAddress = "0x50969c18c51A9A89DC5911997e23fAF3042A4D33".toLowerCase();
   const makerAssetAmount = new BigNumber(1);
   const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
     new BigNumber(10),
@@ -62,7 +62,7 @@ let utils = require("./utils");
 
   const makerERC721ApprovalTxHash = await erc721Token
     .setApprovalForAll(contractWrappers.contractAddresses.erc721Proxy, true)
-    .sendTransactionAsync({ from: maker });
+    .sendTransactionAsync({ from: maker, gas: 8000000, gasPrice: 1000000000 });
   console.log(makerERC721ApprovalTxHash);
 
   // ERC20
@@ -84,7 +84,7 @@ let utils = require("./utils");
       contractWrappers.contractAddresses.erc20Proxy,
       UNLIMITED_ALLOWANCE_IN_BASE_UNITS
     )
-    .sendTransactionAsync({ from: taker });
+    .sendTransactionAsync({ from: taker, gas: 8000000 });
   console.log(takerTestBApprovalTxHash);
 
   // Set up the Order and fill it
@@ -137,12 +137,13 @@ let utils = require("./utils");
   ) {
     console.log("Fillable");
   }
+
   txHash = await contractWrappers.exchange
     .fillOrder(signedOrder, takerAssetAmount, signedOrder.signature)
     .awaitTransactionSuccessAsync({
       from: taker,
       gas: 8000000,
-      gasPrice: 1000000000,
+      gasPrice: 10000000000,
       value: utils.calculateProtocolFee([signedOrder]),
     });
   console.log(txHash);
