@@ -28,6 +28,7 @@ let utils = require("./utils");
     taker2,
     taker,
     taker4,
+    taker5,
   ] = await web3Wrapper.getAvailableAddressesAsync();
 
   const TestBTokenAddress = "0xA1811A48e04e788cE00dc26609a3Ec8766bD07D1".toLowerCase();
@@ -121,17 +122,6 @@ let utils = require("./utils");
     console.log("Fillable");
   }
 
-  let domain = await contractWrappers.exchange
-    .EIP712_EXCHANGE_DOMAIN_HASH()
-    .callAsync();
-
-  // console.log(domain);
-
-  // const zrx = await exchangeDataEncoder.encodeOrdersToExchangeData(
-  //   "fillOrder",
-  //   [signedOrder]
-  // );
-
   let zrx = {
     salt: generatePseudoRandomSalt(),
     expirationTimeSeconds: randomExpiration,
@@ -140,7 +130,12 @@ let utils = require("./utils");
     data: exchangeDataEncoder.encodeOrdersToExchangeData("fillOrder", [
       signedOrder,
     ]),
-    domain: domain,
+    domain: {
+      name: "0x Protocol",
+      version: "3.0.0",
+      chainId: 80001,
+      verifyingContract: contractWrappers.contractAddresses.exchange,
+    },
   };
 
   const takerSign = await signatureUtils.ecSignTransactionAsync(
@@ -149,15 +144,15 @@ let utils = require("./utils");
     taker
   );
 
-  // txHash = await contractWrappers.exchange
-  //   .executeTransaction(takerSign, takerSign.signature)
-  //   .awaitTransactionSuccessAsync({
-  //     from: taker4,
-  //     gas: 8000000,
-  //     gasPrice: 10000000000,
-  //     value: utils.calculateProtocolFee([signedOrder]),
-  //   });
-  // console.log(txHash);
+  txHash = await contractWrappers.exchange
+    .executeTransaction(takerSign, takerSign.signature)
+    .awaitTransactionSuccessAsync({
+      from: taker4,
+      gas: 8000000,
+      gasPrice: 10000000000,
+      value: utils.calculateProtocolFee([signedOrder]),
+    });
+  console.log(txHash);
   providerEngine().stop();
 })().catch((err) => {
   console.log("!!!!!!!!!!!!!!!!!!!", err);
