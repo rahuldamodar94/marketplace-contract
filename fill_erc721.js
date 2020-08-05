@@ -34,11 +34,11 @@ let utils = require("./utils");
   const TestCTokenAddress = "0x50969c18c51A9A89DC5911997e23fAF3042A4D33".toLowerCase();
   const makerAssetAmount = new BigNumber(1);
   const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
-    new BigNumber(10),
+    new BigNumber(1200),
     DECIMALS
   );
   const makerAssetData = await contractWrappers.devUtils
-    .encodeERC721AssetData(TestCTokenAddress, new BigNumber(1))
+    .encodeERC721AssetData(TestCTokenAddress, new BigNumber(2))
     .callAsync();
   const takerAssetData = await contractWrappers.devUtils
     .encodeERC20AssetData(TestBTokenAddress)
@@ -52,7 +52,7 @@ let utils = require("./utils");
     providerEngine()
   );
 
-  const owner = await erc721Token.ownerOf(new BigNumber(1)).callAsync();
+  const owner = await erc721Token.ownerOf(new BigNumber(2)).callAsync();
   console.log(owner);
 
   const isApprovedForAll = await erc721Token
@@ -60,10 +60,10 @@ let utils = require("./utils");
     .callAsync();
   console.log(isApprovedForAll);
 
-  const makerERC721ApprovalTxHash = await erc721Token
-    .setApprovalForAll(contractWrappers.contractAddresses.erc721Proxy, true)
-    .sendTransactionAsync({ from: maker, gas: 8000000, gasPrice: 1000000000 });
-  console.log(makerERC721ApprovalTxHash);
+  // const makerERC721ApprovalTxHash = await erc721Token
+  //   .setApprovalForAll(contractWrappers.contractAddresses.erc721Proxy, true)
+  //   .sendTransactionAsync({ from: maker, gas: 8000000, gasPrice: 1000000000 });
+  // console.log(makerERC721ApprovalTxHash);
 
   // ERC20
   const erc20Token = new ERC20TokenContract(
@@ -79,13 +79,13 @@ let utils = require("./utils");
     .callAsync();
   console.log(allowance);
 
-  const takerTestBApprovalTxHash = await erc20Token
-    .approve(
-      contractWrappers.contractAddresses.erc20Proxy,
-      UNLIMITED_ALLOWANCE_IN_BASE_UNITS
-    )
-    .sendTransactionAsync({ from: taker, gas: 8000000 });
-  console.log(takerTestBApprovalTxHash);
+  // const takerTestBApprovalTxHash = await erc20Token
+  //   .approve(
+  //     contractWrappers.contractAddresses.erc20Proxy,
+  //     UNLIMITED_ALLOWANCE_IN_BASE_UNITS
+  //   )
+  //   .sendTransactionAsync({ from: taker, gas: 8000000 });
+  // console.log(takerTestBApprovalTxHash);
 
   // Set up the Order and fill it
   const randomExpiration = utils.getRandomFutureDateInSeconds();
