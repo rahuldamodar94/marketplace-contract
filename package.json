@@ -17,5 +17,8 @@
     "@0x/subproviders": "^6.0.8",
     "@0x/utils": "^5.4.1",
     "@0x/web3-wrapper": "^7.0.7"
+  },
+  "devDependencies": {
+    "husky": "^4.2.5"
   }
 }
