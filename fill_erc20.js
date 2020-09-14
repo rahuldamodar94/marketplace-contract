@@ -82,7 +82,7 @@ let utils = require("./utils");
     chainId: NETWORK_CONFIGS.chainId,
     exchangeAddress,
     makerAddress: maker,
-    takerAddress: taker,
+    takerAddress: NULL_ADDRESS,
     senderAddress: taker4,
     feeRecipientAddress: NULL_ADDRESS,
     expirationTimeSeconds: randomExpiration,

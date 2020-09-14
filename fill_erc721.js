@@ -34,11 +34,16 @@ let utils = require("./utils");
   const TestCTokenAddress = "0x50969c18c51A9A89DC5911997e23fAF3042A4D33".toLowerCase();
   const makerAssetAmount = new BigNumber(1);
   const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
-    new BigNumber(1200),
+    new BigNumber(50),
+    DECIMALS
+  );
+
+  const takerAssetAmount2 = Web3Wrapper.toBaseUnitAmount(
+    new BigNumber(60),
     DECIMALS
   );
   const makerAssetData = await contractWrappers.devUtils
-    .encodeERC721AssetData(TestCTokenAddress, new BigNumber(2))
+    .encodeERC721AssetData(TestCTokenAddress, new BigNumber(102))
     .callAsync();
   const takerAssetData = await contractWrappers.devUtils
     .encodeERC20AssetData(TestBTokenAddress)
@@ -47,18 +52,18 @@ let utils = require("./utils");
   let txHash;
 
   // ERC721
-  const erc721Token = new ERC721TokenContract(
-    TestCTokenAddress,
-    providerEngine()
-  );
+  // const erc721Token = new ERC721TokenContract(
+  //   TestCTokenAddress,
+  //   providerEngine()
+  // );
 
-  const owner = await erc721Token.ownerOf(new BigNumber(2)).callAsync();
-  console.log(owner);
+  // const owner = await erc721Token.ownerOf(new BigNumber(102)).callAsync();
+  // console.log(owner);
 
-  const isApprovedForAll = await erc721Token
-    .isApprovedForAll(maker, contractWrappers.contractAddresses.erc721Proxy)
-    .callAsync();
-  console.log(isApprovedForAll);
+  // const isApprovedForAll = await erc721Token
+  //   .isApprovedForAll(maker, contractWrappers.contractAddresses.erc721Proxy)
+  //   .callAsync();
+  // console.log(isApprovedForAll);
 
   // const makerERC721ApprovalTxHash = await erc721Token
   //   .setApprovalForAll(contractWrappers.contractAddresses.erc721Proxy, true)
@@ -71,8 +76,8 @@ let utils = require("./utils");
     providerEngine()
   );
 
-  let balance = await erc20Token.balanceOf(taker).callAsync();
-  console.log(balance);
+  // let balance = await erc20Token.balanceOf(taker).callAsync();
+  // console.log(balance);
 
   let allowance = await erc20Token
     .allowance(taker, contractWrappers.contractAddresses.erc20Proxy)
@@ -139,7 +144,7 @@ let utils = require("./utils");
   }
 
   txHash = await contractWrappers.exchange
-    .fillOrder(signedOrder, takerAssetAmount, signedOrder.signature)
+    .fillOrder(signedOrder, takerAssetAmount2, signedOrder.signature)
     .awaitTransactionSuccessAsync({
       from: taker,
       gas: 8000000,
