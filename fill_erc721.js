@@ -12,6 +12,7 @@ let {
 } = require("@0x/order-utils");
 let { BigNumber } = require("@0x/utils");
 let { NETWORK_CONFIGS } = require("./configs");
+let { exchangeDataEncoder } = require("@0x/contracts-exchange");
 let {
   DECIMALS,
   UNLIMITED_ALLOWANCE_IN_BASE_UNITS,
