@@ -73,18 +73,18 @@ let utils = require("./utils");
   // console.log(makerERC721ApprovalTxHash);
 
   // ERC20
-  const erc20Token = new ERC20TokenContract(
-    TestBTokenAddress,
-    providerEngine()
-  );
+  // const erc20Token = new ERC20TokenContract(
+  //   TestBTokenAddress,
+  //   providerEngine()
+  // );
 
   // let balance = await erc20Token.balanceOf(taker).callAsync();
   // console.log(balance);
 
-  let allowance = await erc20Token
-    .allowance(taker, contractWrappers.contractAddresses.erc20Proxy)
-    .callAsync();
-  console.log(allowance);
+  // let allowance = await erc20Token
+  //   .allowance(taker, contractWrappers.contractAddresses.erc20Proxy)
+  //   .callAsync();
+  // console.log(allowance);
 
   // const takerTestBApprovalTxHash = await erc20Token
   //   .approve(
