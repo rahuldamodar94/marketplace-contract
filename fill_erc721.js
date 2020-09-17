@@ -28,7 +28,12 @@ let utils = require("./utils");
     chainId: NETWORK_CONFIGS.chainId,
   });
   const web3Wrapper = new Web3Wrapper(providerEngine());
-  const [maker, taker2, taker] = await web3Wrapper.getAvailableAddressesAsync();
+  const [
+    maker,
+    taker2,
+    taker,
+    taker4,
+  ] = await web3Wrapper.getAvailableAddressesAsync();
   console.log(maker, taker);
   const TestBTokenAddress = "0x6F5b486C2d714c11C66b0a7C794316279B3D41e9".toLowerCase();
   const TestCTokenAddress = "0x50969c18c51A9A89DC5911997e23fAF3042A4D33".toLowerCase();
@@ -38,10 +43,6 @@ let utils = require("./utils");
     DECIMALS
   );
 
-  const takerAssetAmount2 = Web3Wrapper.toBaseUnitAmount(
-    new BigNumber(60),
-    DECIMALS
-  );
   const makerAssetData = await contractWrappers.devUtils
     .encodeERC721AssetData(TestCTokenAddress, new BigNumber(102))
     .callAsync();
@@ -102,7 +103,7 @@ let utils = require("./utils");
     exchangeAddress,
     makerAddress: maker,
     takerAddress: NULL_ADDRESS,
-    senderAddress: NULL_ADDRESS,
+    senderAddress: taker4,
     feeRecipientAddress: NULL_ADDRESS,
     expirationTimeSeconds: randomExpiration,
     salt: generatePseudoRandomSalt(),
@@ -128,8 +129,33 @@ let utils = require("./utils");
   //   .awaitTransactionSuccessAsync({ from: maker, gasPrice: 0, gas: 8000000 });
   // console.log(txHashCancel);
 
+  /// to be added
+  let zrx = {
+    salt: generatePseudoRandomSalt(),
+    expirationTimeSeconds: randomExpiration,
+    gasPrice: 10000000000,
+    signerAddress: taker,
+    data: exchangeDataEncoder.encodeOrdersToExchangeData("fillOrder", [
+      signedOrder,
+    ]),
+    domain: {
+      name: "0x Protocol",
+      version: "3.0.0",
+      chainId: 80001,
+      verifyingContract: contractWrappers.contractAddresses.exchange,
+    },
+  };
+
+  const takerSign = await signatureUtils.ecSignTransactionAsync(
+    providerEngine(),
+    zrx,
+    taker
+  );
+
+  /// to be added
+
   const [
-    { orderStatus, orderHash },
+    { orderStatus },
     remainingFillableAmount,
     isValidSignature,
   ] = await contractWrappers.devUtils
@@ -143,15 +169,19 @@ let utils = require("./utils");
     console.log("Fillable");
   }
 
+  /// to be removed
   txHash = await contractWrappers.exchange
-    .fillOrder(signedOrder, takerAssetAmount2, signedOrder.signature)
+    .executeTransaction(takerSign, takerSign.signature)
     .awaitTransactionSuccessAsync({
-      from: taker,
+      from: taker4,
       gas: 8000000,
       gasPrice: 10000000000,
       value: utils.calculateProtocolFee([signedOrder]),
     });
+
+  /// to be removed
   console.log(txHash);
+
   providerEngine().stop();
 })().catch((err) => {
   console.log("!!!!!!!!!!!!!!!!!!!", err);

@@ -5,8 +5,8 @@ let {
 } = require("@0x/contract-wrappers");
 let { providerEngine } = require("./provider_engine");
 let { generatePseudoRandomSalt, signatureUtils } = require("@0x/order-utils");
-let { BigNumber, abiUtils } = require("@0x/utils");
-let { NETWORK_CONFIGS, TX_DEFAULTS } = require("./configs");
+let { BigNumber } = require("@0x/utils");
+let { NETWORK_CONFIGS } = require("./configs");
 let { exchangeDataEncoder } = require("@0x/contracts-exchange");
 let {
   DECIMALS,
@@ -106,22 +106,6 @@ let utils = require("./utils");
   // const txHashCancel = await contractWrappers.exchange.cancelOrder(order).awaitTransactionSuccessAsync({ from: maker, gas: 8000000 });
   // console.log(txHashCancel)
 
-  const [
-    { orderStatus, orderHash },
-    remainingFillableAmount,
-    isValidSignature,
-  ] = await contractWrappers.devUtils
-    .getOrderRelevantState(signedOrder, signedOrder.signature)
-    .callAsync();
-
-  if (
-    orderStatus === OrderStatus.Fillable &&
-    remainingFillableAmount.isGreaterThan(0) &&
-    isValidSignature
-  ) {
-    console.log("Fillable");
-  }
-
   let zrx = {
     salt: generatePseudoRandomSalt(),
     expirationTimeSeconds: randomExpiration,
@@ -144,6 +128,24 @@ let utils = require("./utils");
     taker
   );
 
+  const [
+    { orderStatus },
+    remainingFillableAmount,
+    isValidSignature,
+  ] = await contractWrappers.devUtils
+    .getOrderRelevantState(signedOrder, signedOrder.signature)
+    .callAsync();
+
+  if (
+    orderStatus === OrderStatus.Fillable &&
+    remainingFillableAmount.isGreaterThan(0) &&
+    isValidSignature
+  ) {
+    console.log("Fillable");
+  } else {
+    console.log("Not Fillable");
+  }
+
   txHash = await contractWrappers.exchange
     .executeTransaction(takerSign, takerSign.signature)
     .awaitTransactionSuccessAsync({
@@ -153,6 +155,7 @@ let utils = require("./utils");
       value: utils.calculateProtocolFee([signedOrder]),
     });
   console.log(txHash);
+
   providerEngine().stop();
 })().catch((err) => {
   console.log("!!!!!!!!!!!!!!!!!!!", err);
