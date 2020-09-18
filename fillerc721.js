@@ -37,24 +37,24 @@ let utils = require("./utils");
     taker5,
   ] = await web3Wrapper.getAvailableAddressesAsync();
   console.log(maker, taker);
-  const TestBTokenAddress = "0x927d909Cda7cD9Fee03f9481210907A3cB51781a".toLowerCase();
-  const TestCTokenAddress = "0x8CF293247CBFB38cB6474d5f9cE64Dda7db974bc".toLowerCase();
-  const makerAssetAmount = new BigNumber(1);
-  const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
+  const TestBTokenAddress = "0x8CF293247CBFB38cB6474d5f9cE64Dda7db974bc".toLowerCase();
+  const TestCTokenAddress = "0x927d909Cda7cD9Fee03f9481210907A3cB51781a".toLowerCase();
+  const takerAssetAmount = new BigNumber(1);
+  const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(
     new BigNumber(50),
     DECIMALS
   );
 
-  const makerAssetData = await contractWrappers.devUtils
+  const takerAssetData = await contractWrappers.devUtils
     .encodeERC721AssetData(
-      TestCTokenAddress,
+      TestBTokenAddress,
       new BigNumber(
         "105045125714244168733981138770329276532473093455428486030848904550754377656049"
       )
     )
     .callAsync();
-  const takerAssetData = await contractWrappers.devUtils
-    .encodeERC20AssetData(TestBTokenAddress)
+  const makerAssetData = await contractWrappers.devUtils
+    .encodeERC20AssetData(TestCTokenAddress)
     .callAsync();
 
   // let txHash;
@@ -105,7 +105,7 @@ let utils = require("./utils");
   const order = {
     chainId: NETWORK_CONFIGS.chainId,
     exchangeAddress,
-    makerAddress: maker,
+    makerAddress: taker,
     takerAddress: NULL_ADDRESS,
     senderAddress: taker4,
     feeRecipientAddress: NULL_ADDRESS,
@@ -124,14 +124,14 @@ let utils = require("./utils");
   const signedOrder = await signatureUtils.ecSignOrderAsync(
     providerEngine(),
     order,
-    maker
+    taker
   );
 
   let zrx = {
     salt: generatePseudoRandomSalt(),
     expirationTimeSeconds: parseInt(randomExpiration) + 1000000000,
     gasPrice: 10000000000,
-    signerAddress: taker,
+    signerAddress: maker,
     data: exchangeDataEncoder.encodeOrdersToExchangeData("fillOrder", [
       signedOrder,
     ]),
@@ -146,7 +146,7 @@ let utils = require("./utils");
   const takerSign = await signatureUtils.ecSignTransactionAsync(
     providerEngine(),
     zrx,
-    taker
+    maker
   );
 
   const [
@@ -167,20 +167,20 @@ let utils = require("./utils");
     console.log("Not fillable");
   }
 
-  console.log(JSON.stringify(signedOrder));
-  console.log("##################################");
-  console.log(JSON.stringify(takerSign));
+  //   console.log(JSON.stringify(signedOrder));
+  //   console.log("##################################");
+  //   console.log(JSON.stringify(takerSign));
 
-  // txHash = await contractWrappers.exchange
-  //   .executeTransaction(takerSign, takerSign.signature)
-  //   .awaitTransactionSuccessAsync({
-  //     from: taker4,
-  //     gas: 8000000,
-  //     gasPrice: 10000000000,
-  //     value: utils.calculateProtocolFee([signedOrder]),
-  //   });
+  txHash = await contractWrappers.exchange
+    .executeTransaction(takerSign, takerSign.signature)
+    .awaitTransactionSuccessAsync({
+      from: taker4,
+      gas: 8000000,
+      gasPrice: 10000000000,
+      value: utils.calculateProtocolFee([signedOrder]),
+    });
 
-  // console.log(txHash);
+  console.log(txHash);
 
   // providerEngine().stop();
 })().catch((err) => {
