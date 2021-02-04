@@ -1,7 +1,6 @@
 let {
   ContractWrappers,
   ERC20TokenContract,
-  ERC721TokenContract,
   OrderStatus,
 } = require("@0x/contract-wrappers");
 let { providerEngine } = require("./provider_engine");
@@ -22,7 +21,6 @@ let {
 } = require("./constants");
 let { Web3Wrapper } = require("@0x/web3-wrapper");
 let utils = require("./utils");
-// let dummyERC721TokenContracts = require('./contracts');
 
 (async () => {
   const contractWrappers = new ContractWrappers(providerEngine(), {
@@ -36,58 +34,43 @@ let utils = require("./utils");
     taker4,
     taker5,
   ] = await web3Wrapper.getAvailableAddressesAsync();
-  console.log(maker, taker);
-  const TestBTokenAddress = "0x927d909Cda7cD9Fee03f9481210907A3cB51781a".toLowerCase();
-  const TestCTokenAddress = "0x8CF293247CBFB38cB6474d5f9cE64Dda7db974bc".toLowerCase();
+  const TestBTokenAddress = "0xd393b1E02dA9831Ff419e22eA105aAe4c47E1253".toLowerCase();
+  const TestCTokenAddress = "0xb5eEF11c0b188E9C020254E83E3399b82C62BDdb".toLowerCase();
   const makerAssetAmount = new BigNumber(1);
   const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
-    new BigNumber(50),
+    new BigNumber(0.0000000001),
     DECIMALS
   );
 
   const makerAssetData = await contractWrappers.devUtils
-    .encodeERC721AssetData(
+    .encodeERC1155AssetData(
       TestCTokenAddress,
-      new BigNumber(
-        "105045125714244168733981138770329276532473093455428486030848904550754377656049"
-      )
+      [new BigNumber("10")],
+      [new BigNumber("10")],
+      "0x"
     )
     .callAsync();
+
+    
   const takerAssetData = await contractWrappers.devUtils
     .encodeERC20AssetData(TestBTokenAddress)
     .callAsync();
 
-  // let txHash;
+  let txHash;
 
-  // // ERC721
-  // const erc721Token = new ERC721TokenContract(
-  //   TestCTokenAddress,
-  //   providerEngine()
-  // );
+  // ERC20
+  const erc20Token = new ERC20TokenContract(
+    TestBTokenAddress,
+    providerEngine()
+  );
 
-  // const isApprovedForAll = await erc721Token
-  //   .isApprovedForAll(maker, contractWrappers.contractAddresses.erc721Proxy)
-  //   .callAsync();
-  // console.log(isApprovedForAll);
+  let balance = await erc20Token.balanceOf(taker).callAsync();
+  console.log(balance);
 
-  // const makerERC721ApprovalTxHash = await erc721Token
-  //   .setApprovalForAll(contractWrappers.contractAddresses.erc721Proxy, true)
-  //   .sendTransactionAsync({ from: maker, gas: 8000000, gasPrice: 1000000000 });
-  // console.log(makerERC721ApprovalTxHash);
-
-  // // ERC20
-  // const erc20Token = new ERC20TokenContract(
-  //   TestBTokenAddress,
-  //   providerEngine()
-  // );
-
-  // let balance = await erc20Token.balanceOf(taker).callAsync();
-  // console.log(balance);
-
-  // let allowance = await erc20Token
-  //   .allowance(taker, contractWrappers.contractAddresses.erc20Proxy)
-  //   .callAsync();
-  // console.log(allowance);
+  let allowance = await erc20Token
+    .allowance(taker, contractWrappers.contractAddresses.erc20Proxy)
+    .callAsync();
+  console.log(allowance);
 
   // const takerTestBApprovalTxHash = await erc20Token
   //   .approve(
@@ -167,22 +150,18 @@ let utils = require("./utils");
     console.log("Not fillable");
   }
 
-  console.log(JSON.stringify(signedOrder));
-  console.log("##################################");
-  console.log(JSON.stringify(takerSign));
+  txHash = await contractWrappers.exchange
+    .executeTransaction(takerSign, takerSign.signature)
+    .awaitTransactionSuccessAsync({
+      from: taker4,
+      gas: 8000000,
+      gasPrice: 10000000000,
+      value: utils.calculateProtocolFee([signedOrder]),
+    });
 
-  // txHash = await contractWrappers.exchange
-  //   .executeTransaction(takerSign, takerSign.signature)
-  //   .awaitTransactionSuccessAsync({
-  //     from: taker4,
-  //     gas: 8000000,
-  //     gasPrice: 10000000000,
-  //     value: utils.calculateProtocolFee([signedOrder]),
-  //   });
+  console.log(txHash);
 
-  // console.log(txHash);
-
-  // providerEngine().stop();
+  providerEngine().stop();
 })().catch((err) => {
   console.log("!!!!!!!!!!!!!!!!!!!", err);
 });

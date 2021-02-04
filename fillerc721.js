@@ -36,12 +36,11 @@ let utils = require("./utils");
     taker4,
     taker5,
   ] = await web3Wrapper.getAvailableAddressesAsync();
-  console.log(maker, taker);
   const TestBTokenAddress = "0x8CF293247CBFB38cB6474d5f9cE64Dda7db974bc".toLowerCase();
   const TestCTokenAddress = "0x927d909Cda7cD9Fee03f9481210907A3cB51781a".toLowerCase();
   const takerAssetAmount = new BigNumber(1);
   const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(
-    new BigNumber(50),
+    new BigNumber(40),
     DECIMALS
   );
 
@@ -131,8 +130,8 @@ let utils = require("./utils");
     salt: generatePseudoRandomSalt(),
     expirationTimeSeconds: parseInt(randomExpiration) + 1000000000,
     gasPrice: 10000000000,
-    signerAddress: maker,
-    data: exchangeDataEncoder.encodeOrdersToExchangeData("fillOrder", [
+    signerAddress: taker,
+    data: exchangeDataEncoder.encodeOrdersToExchangeData("cancelOrder", [
       signedOrder,
     ]),
     domain: {
@@ -146,7 +145,7 @@ let utils = require("./utils");
   const takerSign = await signatureUtils.ecSignTransactionAsync(
     providerEngine(),
     zrx,
-    maker
+    taker
   );
 
   const [
@@ -167,20 +166,20 @@ let utils = require("./utils");
     console.log("Not fillable");
   }
 
-  //   console.log(JSON.stringify(signedOrder));
-  //   console.log("##################################");
-  //   console.log(JSON.stringify(takerSign));
+  console.log(JSON.stringify(signedOrder));
+  console.log("##################################");
+  console.log(JSON.stringify(takerSign));
 
-  txHash = await contractWrappers.exchange
-    .executeTransaction(takerSign, takerSign.signature)
-    .awaitTransactionSuccessAsync({
-      from: taker4,
-      gas: 8000000,
-      gasPrice: 10000000000,
-      value: utils.calculateProtocolFee([signedOrder]),
-    });
+  // txHash = await contractWrappers.exchange
+  //   .executeTransaction(takerSign, takerSign.signature)
+  //   .awaitTransactionSuccessAsync({
+  //     from: taker4,
+  //     gas: 8000000,
+  //     gasPrice: 10000000000,
+  //     value: utils.calculateProtocolFee([signedOrder]),
+  //   });
 
-  console.log(txHash);
+  // console.log(txHash);
 
   // providerEngine().stop();
 })().catch((err) => {

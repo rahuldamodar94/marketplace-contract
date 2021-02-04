@@ -34,11 +34,11 @@ let utils = require("./utils");
   const TestBTokenAddress = "0xA1811A48e04e788cE00dc26609a3Ec8766bD07D1".toLowerCase();
   const TestCTokenAddress = "0x6F5b486C2d714c11C66b0a7C794316279B3D41e9".toLowerCase();
   const makerAssetAmount = Web3Wrapper.toBaseUnitAmount(
-    new BigNumber(10),
+    new BigNumber(1000),
     DECIMALS
   );
   const takerAssetAmount = Web3Wrapper.toBaseUnitAmount(
-    new BigNumber(10),
+    new BigNumber(1000),
     DECIMALS
   );
   const makerAssetData = await contractWrappers.devUtils
